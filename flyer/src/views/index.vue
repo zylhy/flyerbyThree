@@ -6,14 +6,8 @@
 <script setup>
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-const colors = {
-  red: 0xf25346,
-  white: 0xd8d0d1,
-  brown: 0x59332e,
-  pink: 0xf5986e,
-  brownDark: 0x23190f,
-  blue: 0x68c3c0,
-};
+import colors from 'gameItems/color.js'
+import Sky from 'gameItems/sky.js'
 const renderer = ref(null);
 const gameContainer = ref(null);
 const gameCamera = ref(null);
@@ -37,7 +31,7 @@ const initThree = () => {
     45,
     window.innerWidth / window.innerHeight,
     1,
-    1000
+    10000
   );
   gameCamera.value = camera;
   camera.position.set(0, 100,200);
@@ -79,20 +73,32 @@ const initThree = () => {
   scene.add(light);
   let sea = createSea();
   sea.receiveShadow = true;
-  sea.position.y =-800;
+  sea.position.y =-700;
   sea.rotation.x = -Math.PI/2
   scene.add(sea);
   scene.add(createCube())
+  let sky = new Sky().group
+  sky.position.y = -600
+  sky.position.z = -200
+  sky.rotation.x =-Math.PI/ 12
+
+  scene.add(sky)
+
+
+
   function animate() {
     render.render(scene, camera);
+    sky.rotation.z +=0.005
+    sea.rotation.y -=0.01
     cameraControls.update();
     requestAnimationFrame(animate);
   }
   animate();
 };
+ 
 const createSea = () => {
   // 定义几何体
-  const geometry = new THREE.CylinderGeometry(600, 600,800, 30, 10);
+  const geometry = new THREE.CylinderGeometry(500, 600,800, 30, 10);
   //   geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI/2));
   // 定义材质
   const material = new THREE.MeshPhongMaterial({
@@ -107,10 +113,12 @@ const createSea = () => {
   const sea = new THREE.Mesh(geometry, material);
   return sea;
 };
+
+
 const createCube = ()=>{
     // 创建几何体
     const geometry  = new THREE.BoxGeometry(10,10,10)
-
+    // fff2d6
     const material = new THREE.MeshBasicMaterial({color:colors.blue})
 
     const cube  = new THREE.Mesh(geometry,material)
@@ -118,6 +126,9 @@ const createCube = ()=>{
     cube.position.y = 50
     return cube
 }
+ 
+
+
 const windowResize = () => {
   gameContainer.value.width = window.innerWidth;
   gameContainer.value.height = window.innerHeight;
