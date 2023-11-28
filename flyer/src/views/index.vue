@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import colors from 'gameItems/color.js'
 import Sky from 'gameItems/sky.js'
+import Flyer from 'gameItems/flyer.js'
 const renderer = ref(null);
 const gameContainer = ref(null);
 const gameCamera = ref(null);
@@ -51,7 +52,7 @@ const initThree = () => {
   //   创建平行光
   const light = new THREE.DirectionalLight(0xffffff, 0.9);
   // 设置灯光位置
-  light.position.set(150, 350, 350);
+  light.position.set( 50, 350, 350);
   // 设置是否可以投射阴影
   light.castShadow = true;
   // 设置阴影图的宽度和高度
@@ -76,7 +77,6 @@ const initThree = () => {
   sea.position.y =-700;
   sea.rotation.x = -Math.PI/2
   scene.add(sea);
-  scene.add(createCube())
   let sky = new Sky().group
   sky.position.y = -600
   sky.position.z = -200
@@ -84,12 +84,14 @@ const initThree = () => {
 
   scene.add(sky)
 
-
+let flyer = new Flyer()
+scene.add(flyer.group)
 
   function animate() {
     render.render(scene, camera);
     sky.rotation.z +=0.005
     sea.rotation.y -=0.01
+  flyer.propellerRun()
     cameraControls.update();
     requestAnimationFrame(animate);
   }
@@ -113,21 +115,6 @@ const createSea = () => {
   const sea = new THREE.Mesh(geometry, material);
   return sea;
 };
-
-
-const createCube = ()=>{
-    // 创建几何体
-    const geometry  = new THREE.BoxGeometry(10,10,10)
-    // fff2d6
-    const material = new THREE.MeshBasicMaterial({color:colors.blue})
-
-    const cube  = new THREE.Mesh(geometry,material)
-    cube.castShadow = true
-    cube.position.y = 50
-    return cube
-}
- 
-
 
 const windowResize = () => {
   gameContainer.value.width = window.innerWidth;
