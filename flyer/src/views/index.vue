@@ -1,23 +1,25 @@
 <template>
   <div class="Wrap">
-    <canvas ref="gameContainer" id="game"></canvas>
+    <canvas ref="gameContainer" id="game" @mousemove="mouseMove"></canvas>
   </div>
 </template>
 <script setup>
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import colors from 'gameItems/color.js'
-import Sky from 'gameItems/sky.js'
-import Flyer from 'gameItems/flyer.js'
+import colors from "gameItems/color.js";
+import Sky from "gameItems/sky.js";
+import Flyer from "gameItems/flyer.js";
 const renderer = ref(null);
 const gameContainer = ref(null);
 const gameCamera = ref(null);
+const gameFlyer = ref(null);
+const mousePosition = reactive({ x: 0, y: 0 });
 const initThree = () => {
   gameContainer.value.width = window.innerWidth;
   gameContainer.value.height = window.innerHeight;
   //   创建场景
   const scene = new THREE.Scene();
-//   scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+  //   scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
   //创建渲染器
   const render = new THREE.WebGLRenderer({
     canvas: gameContainer.value,
@@ -35,7 +37,7 @@ const initThree = () => {
     10000
   );
   gameCamera.value = camera;
-  camera.position.set(0, 100,200);
+  camera.position.set(0, 100, 200);
   camera.lookAt(0, 0, 0);
   scene.add(camera);
 
@@ -52,7 +54,7 @@ const initThree = () => {
   //   创建平行光
   const light = new THREE.DirectionalLight(0xffffff, 0.9);
   // 设置灯光位置
-  light.position.set( 50, 350, 350);
+  light.position.set(50, 350, 350);
   // 设置是否可以投射阴影
   light.castShadow = true;
   // 设置阴影图的宽度和高度
@@ -74,33 +76,59 @@ const initThree = () => {
   scene.add(light);
   let sea = createSea();
   sea.receiveShadow = true;
-  sea.position.y =-700;
-  sea.rotation.x = -Math.PI/2
+  sea.position.y = -700;
+  sea.rotation.x = -Math.PI / 2;
   scene.add(sea);
-  let sky = new Sky().group
-  sky.position.y = -600
-  sky.position.z = -200
-  sky.rotation.x =-Math.PI/ 12
+  let sky = new Sky().group;
+  sky.position.y = -600;
+  sky.position.z = -200;
+  sky.rotation.x = -Math.PI / 12;
 
-  scene.add(sky)
+  scene.add(sky);
 
-let flyer = new Flyer()
-scene.add(flyer.group)
+  let flyer = new Flyer();
+  gameFlyer.value = flyer.group;
+  scene.add(flyer.group);
 
   function animate() {
     render.render(scene, camera);
-    sky.rotation.z +=0.005
-    sea.rotation.y -=0.01
-  flyer.propellerRun()
+    sky.rotation.z += 0.005;
+    sea.rotation.y -= 0.01;
+    flyer.propellerRun();
+    flyerMove()
     cameraControls.update();
     requestAnimationFrame(animate);
   }
   animate();
 };
- 
+const mouseMove = (e) => {
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  let x =1- (e.clientX / width)*2;
+  let y =1- (e.clientY / height)*2;
+  mousePosition.x = x;
+  mousePosition.y = y;
+};
+const flyerMove = ()=>{
+  //让x在-100 到100 之间
+gameFlyer.value.position.x  = mousePosition.x *(-100)
+
+gameFlyer.value.position.y = mousePosition.y*50
+}
+const normalize  = (val, vmin,vmax,tmin,tmax)=>{
+// 先拿到初始值，在vmin~vmax 中
+let v= Math.min(Math.max(val,vmin),vmax)
+// 获取v在vmin~vmax区间的比例
+let p =  v/(vmax - vmin)
+// 把这个比例映射到真实区间上
+let t = p*(tmax - tmin)
+ return t 
+}
+
+
 const createSea = () => {
   // 定义几何体
-  const geometry = new THREE.CylinderGeometry(500, 600,800, 30, 10);
+  const geometry = new THREE.CylinderGeometry(500, 600, 800, 30, 10);
   //   geometry.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI/2));
   // 定义材质
   const material = new THREE.MeshPhongMaterial({
@@ -110,7 +138,7 @@ const createSea = () => {
     transparent: true,
     // 设置透明度
     opacity: 0.7,
-    flatShading:true
+    flatShading: true,
   });
   const sea = new THREE.Mesh(geometry, material);
   return sea;

@@ -37,7 +37,7 @@ class Wing {
     mesh = null;
     constructor() {
         let geometry = new THREE.BoxGeometry(15, 3, 40)
-        let material = new THREE.MeshPhongMaterial({ color: colors.white ,flatShading:true})
+        let material = new THREE.MeshPhongMaterial({ color: colors.pink ,flatShading:true})
         this.mesh = new THREE.Mesh(geometry, material)
         this.mesh.castShadow = true
         this.mesh.receiveShadow = true
